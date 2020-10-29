@@ -1,5 +1,7 @@
 package com.aprogrammer.howfar
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -44,13 +46,26 @@ class FirstFragment : Fragment() {
         spinner = view.findViewById(R.id.progressBar)
         spinner!!.visibility = View.GONE
         view.findViewById<Button>(R.id.button_calc_distance).setOnClickListener {
+            hideKeyboard()
             currentPlace =
                 view.findViewById<TextInputLayout>(R.id.textFieldSrc).editText!!.text.toString()
                     .trimEnd()
-            locations = textField.editText!!.text.toString()
+            locations = textField.editText!!.text.toString().trim()
             spinner!!.visibility = View.VISIBLE
             mContentView!!.visibility = View.GONE
             getCurrentData(currentPlace, locations.lines())
+        }
+        view.findViewById<Button>(R.id.button_paste).setOnClickListener {
+            val clipboard =
+                requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            val textToPaste = clipboard?.primaryClip?.getItemAt(0)?.text
+            val currentText = textField.editText!!.text.toString()
+            textField.editText!!.setText("$textToPaste\n$currentText")
+
+
+        }
+        view.findViewById<Button>(R.id.button_clear).setOnClickListener {
+            textField.editText!!.text.clear()
         }
     }
 
@@ -69,7 +84,8 @@ class FirstFragment : Fragment() {
 
         val requests = ArrayList<Observable<*>>()
         for (location in locations) {
-            requests.add(service.getData("$currentLocation|$location"))
+            if (location.isNotBlank())
+                requests.add(service.getData("$currentLocation|$location"))
         }
         Observable
             .zip(requests) {
