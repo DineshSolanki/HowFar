@@ -1,4 +1,5 @@
 package com.aprogrammer.howfar
+
 import com.google.gson.annotations.SerializedName
 
 
@@ -221,8 +222,7 @@ data class Wikipedia(
     val thumbnail: String = ""
 )
 
-class Lastminutede(
-)
+class Lastminutede
 
 data class Destination(
     @SerializedName("time")
