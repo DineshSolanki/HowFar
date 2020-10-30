@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity(), InternetConnectionListener {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +25,11 @@ class MainActivity : AppCompatActivity(), InternetConnectionListener {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_about ->{
+                Snackbar.make(window.decorView.findViewById(android.R.id.content),
+                    "Developed by: Dinesh Solanki",Snackbar.LENGTH_SHORT).show()
+                true}
+
             else -> super.onOptionsItemSelected(item)
         }
     }
