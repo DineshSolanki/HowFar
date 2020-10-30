@@ -5,11 +5,12 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), InternetConnectionListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
+        (this@MainActivity.application as App).setInternetConnectionListener(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -26,5 +27,13 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onInternetUnavailable() {
+      //TODO()
+    }
+    override fun onPause() {
+        super.onPause()
+        (application as App).removeInternetConnectionListener()
     }
 }

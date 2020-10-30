@@ -20,7 +20,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_first.*
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 
 /**
@@ -33,8 +33,8 @@ class FirstFragment : Fragment() {
     private var spinner: ProgressBar? = null
     private var mContentView: View? = null
     private val baseUrl = "https://www.distance24.org/"
-    lateinit var appView: View
-    private lateinit var service:Distance24
+    private lateinit var appView: View
+    private lateinit var service: Distance24
     private lateinit var retrofit: Retrofit
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,23 +51,28 @@ class FirstFragment : Fragment() {
         spinner = view.findViewById(R.id.progressBar)
         spinner!!.visibility = View.GONE
         appView = view
+
         retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
         service = retrofit.create(Distance24::class.java)
         view.findViewById<Button>(R.id.button_calc_distance).setOnClickListener {
+
             hideKeyboard()
             currentPlace =
                 view.findViewById<TextInputLayout>(R.id.textFieldSrc).editText!!.text.toString()
                     .trimEnd()
             locations = textField.editText!!.text.toString().trim()
-            spinner!!.visibility = View.VISIBLE
-            progressBarText.text=getString(R.string.initial_loading_text)
-            progressBarText.visibility=View.VISIBLE
-            mContentView!!.visibility = View.GONE
-            getCurrentData(currentPlace, locations.lines())
+            if (currentPlace.isNotBlank() && locations.isNotBlank()) {
+                spinner!!.visibility = View.VISIBLE
+                progressBarText.text = getString(R.string.initial_loading_text)
+                progressBarText.visibility = View.VISIBLE
+                mContentView!!.visibility = View.GONE
+                getCurrentData(currentPlace, locations.lines())
+            }
+
         }
         view.findViewById<Button>(R.id.button_paste).setOnClickListener {
             val clipboard =
@@ -88,6 +93,7 @@ class FirstFragment : Fragment() {
         locations: List<String>
     ) {
 
+
         val places: MutableList<Place> = mutableListOf()
         val requests = ArrayList<Observable<*>>()
         for (location in locations) {
@@ -95,10 +101,13 @@ class FirstFragment : Fragment() {
                 val r = service.getData("$currentLocation|$location")
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    r.subscribe {
-                        val s = getString(R.string.loading_text, it.stops[1].city);
-                        progressBarText.text = s
-                    }
+                r.subscribe( {
+                    val s = getString(R.string.loading_text, it.stops[1].city)
+                    progressBarText.text = s
+                }, {showSnack(it.localizedMessage!!)
+                    mContentView!!.visibility = View.VISIBLE
+                    spinner!!.visibility = View.GONE
+                    progressBarText.visibility = View.GONE})
                 requests.add(r)
             }
         }
@@ -114,7 +123,7 @@ class FirstFragment : Fragment() {
             .subscribe({
                 mContentView!!.visibility = View.VISIBLE
                 spinner!!.visibility = View.GONE
-                progressBarText.visibility=View.GONE
+                progressBarText.visibility = View.GONE
                 places.sortBy { it.distance }
                 val myIntent = Intent(activity, PlaceDataList::class.java)
                 myIntent.putExtra("currentPlace", currentPlace)
@@ -128,6 +137,5 @@ class FirstFragment : Fragment() {
     fun showSnack(msg: String) {
         Snackbar.make(appView, msg, Snackbar.LENGTH_INDEFINITE).show()
     }
-
 }
 
