@@ -61,17 +61,16 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textFieldList"
-            android:layout_width="330dp"
-            android:layout_height="419dp"
+            android:layout_width="325dp"
+            android:layout_height="460dp"
             android:hint="@string/new_line_separated_destinations"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button_calc_distance"
             app:startIconDrawable="@drawable/ic_world_map">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
+                android:layout_width="317dp"
                 android:layout_height="match_parent"
                 android:gravity="top|start"
                 android:inputType="textMultiLine" />

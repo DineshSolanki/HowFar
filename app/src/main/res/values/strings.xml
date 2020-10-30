@@ -9,5 +9,7 @@
     <string name="calculate_distance">Calculate Distance</string>
     <string name="new_line_separated_destinations">New Line Separated Destinations</string>
     <string name="place_list_header_name">Name</string>
-    <string name="place_list_header_distance">Distance</string>
+    <string name="place_list_header_distance">Distance(in km.)</string>
+    <string name="loading_text">%1$s …</string>
+    <string name="initial_loading_text">Shaking Hands …</string>
 </resources>
