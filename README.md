@@ -6,5 +6,6 @@ How Far? is an android app that shows distance from a location to a List of anot
 #TODO
 
 - Give search suggestions.
+- Show transport distance along with current(as crow flies) distance.
 - Show routes to the cities. (Direct Flight/Train, indirect route).
 - Show all cities in between 2 given city's route.
