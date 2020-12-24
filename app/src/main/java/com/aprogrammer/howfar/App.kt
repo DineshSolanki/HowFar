@@ -3,6 +3,8 @@ package com.aprogrammer.howfar
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -20,9 +22,6 @@ class App : Application() {
         }
         private set
     private var mInternetConnectionListener: InternetConnectionListener? = null
-    override fun onCreate() {
-        super.onCreate()
-    }
 
     fun setInternetConnectionListener(listener: InternetConnectionListener?) {
         mInternetConnectionListener = listener
@@ -32,14 +31,37 @@ class App : Application() {
         mInternetConnectionListener = null
     }
 
-    private val isInternetAvailable: Boolean
-        get() {
-            val connectivityManager =
-                getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
-            //Aware of depreciation
-            val activeNetworkInfo = connectivityManager!!.activeNetworkInfo
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    @Suppress("DEPRECATION")
+    private fun isInternetAvailable(context: Context): Boolean {
+        var result = false
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val networkCapabilities = connectivityManager.activeNetwork ?: return false
+            val actNw =
+                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+            result = when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } else {
+            connectivityManager.run {
+                connectivityManager.activeNetworkInfo?.run {
+                    result = when (type) {
+                        ConnectivityManager.TYPE_WIFI -> true
+                        ConnectivityManager.TYPE_MOBILE -> true
+                        ConnectivityManager.TYPE_ETHERNET -> true
+                        else -> false
+                    }
+
+                }
+            }
         }
+
+        return result
+    }
 
     private fun provideRetrofit(url: String): Retrofit {
         return Retrofit.Builder()
@@ -50,13 +72,13 @@ class App : Application() {
     }
 
     private fun provideOkHttpClient(): OkHttpClient {
-        val okhttpClientBuilder = OkHttpClient.Builder()
-        okhttpClientBuilder.connectTimeout(30, TimeUnit.SECONDS)
-        okhttpClientBuilder.readTimeout(30, TimeUnit.SECONDS)
-        okhttpClientBuilder.writeTimeout(30, TimeUnit.SECONDS)
-        okhttpClientBuilder.addInterceptor(object : NetworkConnectionInterceptor() {
+        val okHttpClientBuilder = OkHttpClient.Builder()
+        okHttpClientBuilder.connectTimeout(30, TimeUnit.SECONDS)
+        okHttpClientBuilder.readTimeout(30, TimeUnit.SECONDS)
+        okHttpClientBuilder.writeTimeout(30, TimeUnit.SECONDS)
+        okHttpClientBuilder.addInterceptor(object : NetworkConnectionInterceptor() {
             override val isInternetAvailable: Boolean
-                get() = this@App.isInternetAvailable
+                get() = this@App.isInternetAvailable(this@App)
 
             override fun onInternetUnavailable() {
                 if (mInternetConnectionListener != null) {
@@ -64,6 +86,6 @@ class App : Application() {
                 }
             }
         })
-        return okhttpClientBuilder.build()
+        return okHttpClientBuilder.build()
     }
 }

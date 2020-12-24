@@ -10,13 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.android.synthetic.main.fragment_first.*
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -35,6 +35,7 @@ class FirstFragment : Fragment() {
     private lateinit var appView: View
     private lateinit var service: Distance24
     private lateinit var retrofit: Retrofit
+    private lateinit var progressBarText: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,7 +51,7 @@ class FirstFragment : Fragment() {
         spinner = view.findViewById(R.id.progressBar)
         spinner!!.visibility = View.GONE
         appView = view
-
+        progressBarText = view.findViewById(R.id.progressBarText)
         retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(MoshiConverterFactory.create())
@@ -133,7 +134,7 @@ class FirstFragment : Fragment() {
             }
     }
 
-    fun showSnack(msg: String) {
+    private fun showSnack(msg: String) {
         Snackbar.make(appView, msg, Snackbar.LENGTH_INDEFINITE).show()
     }
 }
